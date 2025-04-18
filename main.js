@@ -2,6 +2,8 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 // const https = require('https');
 const axios = require('axios');
 const qrcode = require('qrcode-terminal');
+// const schedule = require('node-schedule');
+var cron = require('node-cron');
 var db = require('./dbsql.js');
 
 const client = new Client({
@@ -15,6 +17,98 @@ const client = new Client({
 
 client.on('ready', () => {
     console.log('Client is ready!');
+    cron.schedule('*/5 * * * *', () => {
+        console.log('running a task every two minutes');
+        console.log('Client is ready!');
+        console.log("running income");
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: 'long',
+        };
+        const tgl = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        var formattedtgl = now.toLocaleDateString('id-ID', tgl).replace(/\s+/g, "%20");
+        var nowtgl = now.toLocaleDateString('id-ID', tgl);
+        var nowDate = now.toLocaleDateString('id-ID', options);
+        console.log(nowDate);
+        console.log('checkpoint 1');
+
+        // Variables to store results from both queries
+        let adminTotal = 0;
+        let workerTotal = 0;
+        let queriesCompleted = 0;
+
+        // First query - admin_income
+        db.query('SELECT SUM(pendapatan) AS total FROM admin_income WHERE tanggal = ?', [nowtgl], (error, results) => {
+            if (error) {
+                console.error("Error in first query:", error);
+            } else {
+                adminTotal = results[0].total || 0;
+                console.log("Admin total pendapatan:", adminTotal);
+
+                // Increment completed queries counter
+                queriesCompleted++;
+
+                // Check if both queries are done
+                if (queriesCompleted === 2) {
+                    constructUrlAndProceed();
+                }
+            }
+        });
+
+        // Second query - your other table
+        db.query('SELECT SUM(fee) AS total FROM worker_job WHERE tanggal = ?', [nowtgl], (error, results) => {
+            if (error) {
+                console.error("Error in second query:", error);
+            } else {
+                workerTotal = results[0].total || 0;
+                console.log("Other total pendapatan:", workerTotal);
+
+                // Increment completed queries counter
+                queriesCompleted++;
+
+                // Check if both queries are done
+                if (queriesCompleted === 2) {
+                    constructUrlAndProceed();
+                }
+            }
+        });
+
+        // Function to construct URL and proceed after both queries complete
+        function constructUrlAndProceed() {
+            // Use both totals as needed
+            var intotal = parseInt(adminTotal) + parseInt(workerTotal);
+            console.log("Total pendapatan:", intotal);  // Use this if you want to sum both totals
+            var profit = intotal - 0; // Assuming 0 is your fixed cost, replace with actual value if needed
+            const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=income&name=' +
+                nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
+
+            console.log("Final URL:", url);
+
+            axios.get(url)
+                .then(response => {
+                    console.log("running5");
+                    console.log(response.data);
+                    client.sendMessage("6281334301420@c.us", "Income data added ✅");
+                })
+                .catch(error => {
+                    console.error(`Error: ${error.message}`);
+                });
+            client.sendMessage("6281334301420@c.us", 'Tanggal: ' + nowtgl + '\n' +
+                'Income admin:' + adminTotal +
+                '\nIncome Worker: ' + workerTotal +
+                '\nIncome total: ' + intotal +
+                '\nProfit: ' + profit + '\n'
+            );
+            // Continue with your code (fetching URL, replying to message, etc.)
+            // fetch(url)...
+            // message.reply(`Admin: ${adminTotal}, Other: ${otherTotal}`);
+        }
+    });
 });
 
 client.on('qr', qr => {
@@ -76,23 +170,31 @@ client.on('message_create', message => {
             day: 'numeric'      // 24
         };
         var formattedDate = now.toLocaleDateString('id-ID', options).replace(/\s+/g, "%20");
+        var nowDate = now.toLocaleDateString('id-ID', options);
 
         var noteformat = note.replace(/\s+/g, "%20");
-        console.log("runningquerry");
+        // console.log("runningquerry");
 
 
-        console.log("runningquerry2");
+        // console.log("runningquerry2");
         db.query('SELECT COUNT(*) AS count FROM worker_job WHERE admin = ?', [name], (error, results) => {
             if (error) {
                 console.error(error);
             } else {
                 const count = results[0].count;
-                console.log(`Total rows with name ${name}: ${count}`);
+                // console.log(`Total rows with name ${name}: ${count}`);
                 totjob = count;
-                console.log("totjob: " + totjob);
-                const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=recap&name=' + name + '&date=' + formattedDate + '&totaljob=' + totjob + '&pendapatan=' + incomeformat + '&note=' + noteformat;
-                console.log(url);
+                // console.log("totjob: " + totjob);
+                db.query('INSERT INTO admin_income (id, admin, jml_order, pendapatan, tanggal) VALUES (?, ?, ?, ?, ?)', ["", name, totjob, incomeformat, nowDate], (error, results) => {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        console.info("Data inserted into recap table");
+                    }
+                });
 
+                const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=recap&name=' + name + '&date=' + formattedDate + '&totaljob=' + totjob + '&pendapatan=' + incomeformat + '&note=' + noteformat;
+                // console.log(url);
                 axios.get(url)
                     .then(response => {
                         console.log("running5");
@@ -268,5 +370,134 @@ client.on('message_create', message => {
         ).catch(error => {
             console.error(`Error: ${error.message}`);
         });
+        // client.sendMessage(message.from, );
+    }
+});
+
+// client.on('message_create', message => {
+//     var count;
+//     if (message.body === '!income') {
+//         // let total = 0;
+//         const now = new Date();
+//         const options = {
+//             year: 'numeric',    // 2025
+//             month: 'long',      // March
+//             // day: 'numeric'      // 24
+//         };
+//         const tgl = {
+//             year: 'numeric',    // 2025
+//             month: 'long',      // March
+//             day: 'numeric'      // 24
+//         };
+//         var formattedtgl = now.toLocaleDateString('id-ID', tgl).replace(/\s+/g, "%20");
+//         var formattedDate = now.toLocaleDateString('id-ID', options).replace(/\s+/g, "%20");
+//         console.log(formattedDate);
+//         let total = 0;
+//         db.query('SELECT SUM(pendapatan) AS total FROM admin_income WHERE tanggal = ?', [formattedtgl], (error, results) => {
+//             if (error) {
+//                 console.error(error);
+//             } else {
+//                 total = results[0].total || 0; // Use 0 if total is null
+//                 console.log("Total pendapatan:", total);
+//             }
+//         });
+//         console.log(total);
+//         const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=income&name=' + formattedDate + '&tgl=' + formattedtgl + '&inadmin'
+
+//     }
+// });
+
+
+client.on('message_create', message => {
+    job; // Check if the job is running
+    if (message.body === '!income') {
+        console.log("running income");
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: 'long',
+        };
+        const tgl = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        var formattedtgl = now.toLocaleDateString('id-ID', tgl).replace(/\s+/g, "%20");
+        var nowtgl = now.toLocaleDateString('id-ID', tgl);
+        var nowDate = now.toLocaleDateString('id-ID', options);
+        console.log(nowDate);
+        console.log('checkpoint 1');
+
+        // Variables to store results from both queries
+        let adminTotal = 0;
+        let workerTotal = 0;
+        let queriesCompleted = 0;
+
+        // First query - admin_income
+        db.query('SELECT SUM(pendapatan) AS total FROM admin_income WHERE tanggal = ?', [nowtgl], (error, results) => {
+            if (error) {
+                console.error("Error in first query:", error);
+            } else {
+                adminTotal = results[0].total || 0;
+                console.log("Admin total pendapatan:", adminTotal);
+
+                // Increment completed queries counter
+                queriesCompleted++;
+
+                // Check if both queries are done
+                if (queriesCompleted === 2) {
+                    constructUrlAndProceed();
+                }
+            }
+        });
+
+        // Second query - your other table
+        db.query('SELECT SUM(fee) AS total FROM worker_job WHERE tanggal = ?', [nowtgl], (error, results) => {
+            if (error) {
+                console.error("Error in second query:", error);
+            } else {
+                workerTotal = results[0].total || 0;
+                console.log("Other total pendapatan:", workerTotal);
+
+                // Increment completed queries counter
+                queriesCompleted++;
+
+                // Check if both queries are done
+                if (queriesCompleted === 2) {
+                    constructUrlAndProceed();
+                }
+            }
+        });
+
+        // Function to construct URL and proceed after both queries complete
+        function constructUrlAndProceed() {
+            // Use both totals as needed
+            var intotal = parseInt(adminTotal) + parseInt(workerTotal);
+            console.log("Total pendapatan:", intotal);  // Use this if you want to sum both totals
+            var profit = intotal - 0; // Assuming 0 is your fixed cost, replace with actual value if needed
+            const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=income&name=' +
+                nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
+
+            console.log("Final URL:", url);
+
+            axios.get(url)
+                .then(response => {
+                    console.log("running5");
+                    console.log(response.data);
+                    client.sendMessage(message.from, "Income data added ✅");
+                })
+                .catch(error => {
+                    console.error(`Error: ${error.message}`);
+                });
+            client.sendMessage(message.from, 'Tanggal: ' + nowtgl + '\n' +
+                'Income admin:' + adminTotal +
+                '\nIncome Worker: ' + workerTotal +
+                '\nIncome total: ' + intotal +
+                '\nProfit: ' + profit + '\n'
+            );
+            // Continue with your code (fetching URL, replying to message, etc.)
+            // fetch(url)...
+            // message.reply(`Admin: ${adminTotal}, Other: ${otherTotal}`);
+        }
     }
 });
