@@ -17,8 +17,8 @@ const client = new Client({
 
 client.on('ready', () => {
     console.log('Client is ready!');
-    cron.schedule('*/5 * * * *', () => {
-        console.log('running a task every two minutes');
+    cron.schedule('0 0 23 * * *', () => {
+        console.log('running a task midnight');
         console.log('Client is ready!');
         console.log("running income");
         const now = new Date();
