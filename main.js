@@ -149,7 +149,7 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
     // console.log(arr[0]);
-    if (arr[0] === '!recap' && message.from === "6281334301420@c.us") {
+    if (arr[0] === '!recap' && message.from === "628979999931@c.us") {
         console.log("runningrecap");
 
         const str = message.body;
@@ -233,7 +233,7 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
 
-    if (message.from === "6281334301420@c.us" && arr[0].charAt(0) !== '!') {
+    if (message.from === "628979999931@c.us" && arr[0].charAt(0) !== '!') {
 
         // client.sendMessage(message.body);
         console.log("running");
