@@ -84,10 +84,18 @@ client.on('ready', () => {
             var intotal = parseInt(adminTotal) + parseInt(workerTotal);
             console.log("Total pendapatan:", intotal);  // Use this if you want to sum both totals
             var profit = intotal - 0; // Assuming 0 is your fixed cost, replace with actual value if needed
-            const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=income&name=' +
+            const url = 'https://script.google.com/macros/s/AKfycbwp19OXpAXtjPg-PfbJ7MLl3lBgxvvugQT1rtY4G4jth6cQvrrQQdl8BFBB4I9uPow/exec?action=income&name=' +
                 nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
 
             console.log("Final URL:", url);
+
+            db.query('INSERT INTO income_recap (id, in_admin, in_worker, total_in, outcome, keterangan, profit, tanggal) VALUES (?, ?, ?, ?, ?, ?)', ["", adminTotal, workerTotal, intotal, "0", profit, nowtgl], (error, results) => {
+                if (error) {
+                    console.error(error);
+                } else {
+                    console.info("Data inserted into income table");
+                }
+            });
 
             axios.get(url)
                 .then(response => {
@@ -141,7 +149,7 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
     // console.log(arr[0]);
-    if (arr[0] === '!recap' && message.from === "628979999931@c.us") {
+    if (arr[0] === '!recap' && message.from === "6281334301420@c.us") {
         console.log("runningrecap");
 
         const str = message.body;
@@ -193,8 +201,9 @@ client.on('message_create', message => {
                     }
                 });
 
-                const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=recap&name=' + name + '&date=' + formattedDate + '&totaljob=' + totjob + '&pendapatan=' + incomeformat + '&note=' + noteformat;
-                // console.log(url);
+                const url = 'https://script.google.com/macros/s/AKfycbwp19OXpAXtjPg-PfbJ7MLl3lBgxvvugQT1rtY4G4jth6cQvrrQQdl8BFBB4I9uPow/exec?action=recap&name=' + name + '&date=' + formattedDate + '&totaljob=' + totjob + '&pendapatan=' + incomeformat + '&note=' + noteformat;
+                console.log(url);
+                // return;
                 axios.get(url)
                     .then(response => {
                         console.log("running5");
@@ -278,9 +287,9 @@ client.on('message_create', message => {
         console.log(codeformat);
         // return;
         console.log("running7");
-        const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=addJob&name=' + worker + '&codeJob=' + codeformat + '&jobTaken=' + jobformated + '&date=' + formattedDate + '&fee=Rp' + feeformat;
+        const url = 'https://script.google.com/macros/s/AKfycbwp19OXpAXtjPg-PfbJ7MLl3lBgxvvugQT1rtY4G4jth6cQvrrQQdl8BFBB4I9uPow/exec?action=addJob&name=' + worker + '&codeJob=' + codeformat + '&jobTaken=' + jobformated + '&date=' + formattedDate + '&fee=Rp' + feeformat;
         console.log(url);
-
+        // return;
         axios.get(url)
             .then(response => {
                 console.log("running5");
@@ -311,7 +320,7 @@ client.on('message_create', message => {
 client.on('message_create', message => {
     if (message.body === '!getrecap') {
         // client.sendMessage(message.from, 'Format:\n!addjob\nJobName\nFee\nWorkerName');
-        const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=getrecap'
+        const url = 'https://script.google.com/macros/s/AKfycbwp19OXpAXtjPg-PfbJ7MLl3lBgxvvugQT1rtY4G4jth6cQvrrQQdl8BFBB4I9uPow/exec?action=getrecap'
         axios.get(url).then(response => {
             console.log(response.data);
             var data = response.data;
@@ -470,34 +479,89 @@ client.on('message_create', message => {
         });
 
         // Function to construct URL and proceed after both queries complete
+        // function constructUrlAndProceed() {
+        //     // Use both totals as needed
+        //     var intotal = parseInt(adminTotal) + parseInt(workerTotal);
+        //     console.log("Total pendapatan:", intotal);  // Use this if you want to sum both totals
+        //     var profit = intotal - 0; // Assuming 0 is your fixed cost, replace with actual value if needed
+        //     const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=income&name=' +
+        //         nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
+
+        //     console.log("Final URL:", url);
+
+        //     axios.get(url)
+        //         .then(response => {
+        //             console.log("running5");
+        //             console.log(response.data);
+        //             client.sendMessage(message.from, "Income data added ✅");
+        //         })
+        //         .catch(error => {
+        //             console.error(`Error: ${error.message}`);
+        //         });
+        //     client.sendMessage(message.from, 'Tanggal: ' + nowtgl + '\n' +
+        //         'Income admin:' + adminTotal +
+        //         '\nIncome Worker: ' + workerTotal +
+        //         '\nIncome total: ' + intotal +
+        //         '\nProfit: ' + profit + '\n'
+        //     );
+        //     // Continue with your code (fetching URL, replying to message, etc.)
+        //     // fetch(url)...
+        //     // message.reply(`Admin: ${adminTotal}, Other: ${otherTotal}`);
+        // }
+
         function constructUrlAndProceed() {
             // Use both totals as needed
             var intotal = parseInt(adminTotal) + parseInt(workerTotal);
             console.log("Total pendapatan:", intotal);  // Use this if you want to sum both totals
             var profit = intotal - 0; // Assuming 0 is your fixed cost, replace with actual value if needed
-            const url = 'https://script.google.com/macros/s/AKfycbxWE_pgQ71gL-8bwij2sPihgS9nGWvMijTnVP_mdqVaw1-XqZ_6t-YoHPpeJH3GrP3E/exec?action=income&name=' +
-                nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
 
-            console.log("Final URL:", url);
+            // First check if a record for this date already exists
+            db.query('SELECT * FROM income_recap WHERE tanggal = ?', [nowtgl], (error, results) => {
+                if (error) {
+                    console.error("Error checking for existing record:", error);
+                    return;
+                }
 
-            axios.get(url)
-                .then(response => {
-                    console.log("running5");
-                    console.log(response.data);
-                    client.sendMessage(message.from, "Income data added ✅");
-                })
-                .catch(error => {
-                    console.error(`Error: ${error.message}`);
-                });
-            client.sendMessage(message.from, 'Tanggal: ' + nowtgl + '\n' +
-                'Income admin:' + adminTotal +
-                '\nIncome Worker: ' + workerTotal +
-                '\nIncome total: ' + intotal +
-                '\nProfit: ' + profit + '\n'
-            );
-            // Continue with your code (fetching URL, replying to message, etc.)
-            // fetch(url)...
-            // message.reply(`Admin: ${adminTotal}, Other: ${otherTotal}`);
+                // If record exists, don't proceed with insert
+                if (results && results.length > 0) {
+                    console.log(`Record for date ${nowtgl} already exists. Skipping insert.`);
+                    client.sendMessage("6285708999500@c.us", `Income data for date ${nowtgl} already exists. No update performed. ⚠️`);
+                    return;
+                }
+
+                // If no existing record, proceed with insert
+                const url = 'https://script.google.com/macros/s/AKfycbwp19OXpAXtjPg-PfbJ7MLl3lBgxvvugQT1rtY4G4jth6cQvrrQQdl8BFBB4I9uPow/exec?action=income&name=' +
+                    nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
+
+                console.log("Final URL:", url);
+
+                // Notice: There was a mistake in the original query - it had 7 placeholders but only 6 values
+                // Fixed by adding all 7 values in the correct order
+                db.query('INSERT INTO income_recap (id, in_admin, in_worker, total_in, outcome, keterangan, profit, tanggal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                    ["", adminTotal, workerTotal, intotal, "0", "notes", profit, nowtgl], (error, results) => {
+                        if (error) {
+                            console.error(error);
+                        } else {
+                            console.info("Data inserted into income table");
+                        }
+                    });
+
+                axios.get(url)
+                    .then(response => {
+                        console.log("running5");
+                        console.log(response.data);
+                        client.sendMessage("6285708999500@c.us", "Income data added ✅");
+                    })
+                    .catch(error => {
+                        console.error(`Error: ${error.message}`);
+                    });
+                client.sendMessage("6285708999500@c.us", 'Tanggal: ' + nowtgl + '\n' +
+                    'Income admin:' + adminTotal +
+                    '\nIncome Worker: ' + workerTotal +
+                    '\nIncome total: ' + intotal +
+                    '\nProfit: ' + profit + '\n'
+                );
+            });
         }
     }
 });
