@@ -89,7 +89,7 @@ client.on('ready', () => {
 
             console.log("Final URL:", url);
 
-            db.query('INSERT INTO income_recap (id, in_admin, in_worker, total_in, outcome, keterangan, profit, tanggal) VALUES (?, ?, ?, ?, ?, ?)', ["", adminTotal, workerTotal, intotal, "0", profit, nowtgl], (error, results) => {
+            db.query('INSERT INTO income_recap (id, in_admin, in_worker, total_in, outcome, keterangan, profit, tanggal) VALUES (?, ?, ?, ?, ?, ?, ?)', ["", adminTotal, workerTotal, intotal, "0", "-", profit, nowtgl], (error, results) => {
                 if (error) {
                     console.error(error);
                 } else {
@@ -418,8 +418,25 @@ client.on('message_create', message => {
 
 
 client.on('message_create', message => {
-    job; // Check if the job is running
-    if (message.body === '!income') {
+    // job; // Check if the job is running
+
+    const str = message.body;
+    const arr = str.split(/\r?\n/);
+
+    if (arr[0] === '!income' && message.from === "6285708999500@c.us") {
+
+        const str = message.body;
+        const arr = str.split(/\r?\n/);
+
+        var outcome = arr[1].split(' ')[1];
+        var notes = arr[2];
+
+        function replaceLastChar(str, newChar) {
+            return str.slice(0, -1) + newChar;
+        }
+
+        var outcomeformat = replaceLastChar(outcome, ".000");
+
         console.log("running income");
         const now = new Date();
         const options = {
@@ -531,7 +548,7 @@ client.on('message_create', message => {
 
                 // If no existing record, proceed with insert
                 const url = 'https://script.google.com/macros/s/AKfycbwp19OXpAXtjPg-PfbJ7MLl3lBgxvvugQT1rtY4G4jth6cQvrrQQdl8BFBB4I9uPow/exec?action=income&name=' +
-                    nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=0&ket=notes&prof=' + profit;
+                    nowDate + '&tgl=' + formattedtgl + '&inadmin=' + adminTotal + '&inworker=' + workerTotal + '&intotal=' + intotal + '&ouc=' + outcomeformat + '&ket=' + notes + '&prof=' + profit;
 
                 console.log("Final URL:", url);
 
