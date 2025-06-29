@@ -101,12 +101,12 @@ client.on('ready', () => {
                 .then(response => {
                     console.log("running5");
                     console.log(response.data);
-                    client.sendMessage("6285708999500@c.us", "Income data added ✅");
+                    client.sendMessage("6281334301420@c.us", "Income data added ✅");
                 })
                 .catch(error => {
                     console.error(`Error: ${error.message}`);
                 });
-            client.sendMessage("6285708999500@c.us", 'Tanggal: ' + nowtgl + '\n' +
+            client.sendMessage("6281334301420@c.us", 'Tanggal: ' + nowtgl + '\n' +
                 'Income admin:' + adminTotal +
                 '\nIncome Worker: ' + workerTotal +
                 '\nIncome total: ' + intotal +
@@ -149,7 +149,7 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
     // console.log(arr[0]);
-    if (arr[0] === '!recap' && message.from === "628979999931@c.us") {
+    if (arr[0] === '!recap') {
         console.log("runningrecap");
 
         const str = message.body;
@@ -233,7 +233,7 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
 
-    if (message.from === "628979999931@c.us" && arr[0].charAt(0) !== '!') {
+    if (arr[0].charAt(0) !== '!') {
 
         // client.sendMessage(message.body);
         console.log("running");
@@ -423,7 +423,7 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
 
-    if (arr[0] === '!income' && message.from === "6285708999500@c.us") {
+    if (arr[0] === '!income' && message.from === "6281334301420@c.us") {
 
         const str = message.body;
         const arr = str.split(/\r?\n/);
@@ -542,7 +542,7 @@ client.on('message_create', message => {
                 // If record exists, don't proceed with insert
                 if (results && results.length > 0) {
                     console.log(`Record for date ${nowtgl} already exists. Skipping insert.`);
-                    client.sendMessage("6285708999500@c.us", `Income data for date ${nowtgl} already exists. No update performed. ⚠️`);
+                    client.sendMessage("6281334301420@c.us", `Income data for date ${nowtgl} already exists. No update performed. ⚠️`);
                     return;
                 }
 
@@ -567,12 +567,12 @@ client.on('message_create', message => {
                     .then(response => {
                         console.log("running5");
                         console.log(response.data);
-                        client.sendMessage("6285708999500@c.us", "Income data added ✅");
+                        client.sendMessage("6281334301420@c.us", "Income data added ✅");
                     })
                     .catch(error => {
                         console.error(`Error: ${error.message}`);
                     });
-                client.sendMessage("6285708999500@c.us", 'Tanggal: ' + nowtgl + '\n' +
+                client.sendMessage("6281334301420@c.us", 'Tanggal: ' + nowtgl + '\n' +
                     'Income admin:' + adminTotal +
                     '\nIncome Worker: ' + workerTotal +
                     '\nIncome total: ' + intotal +
