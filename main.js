@@ -149,6 +149,66 @@ client.on('message_create', message => {
     const str = message.body;
     const arr = str.split(/\r?\n/);
     // console.log(arr[0]);
+    if (arr[0] === '!keluar') {
+        console.log("runningrecap1");
+
+        const str = message.body;
+        console.log(str);
+        const arr = str.split(/\r?\n/);
+        var outcome = arr[1];
+        console.log(outcome);
+
+
+        function replaceLastChar(str, newChar) {
+            return str.slice(0, -1) + newChar;
+        }
+
+        // var incomeformat = replaceLastChar(income, ".000");
+        var outcomeformat = replaceLastChar(outcome, ".000");
+
+
+        let now = new Date();
+        console.log(outcomeformat);
+        const options = {
+            year: 'numeric',    // 2025
+            month: 'long',      // March
+            day: 'numeric'      // 24
+        };
+        console.log("running10");
+        var formattedDate = now.toLocaleDateString('id-ID', options).replace(/\s+/g, "%20");
+        var nowDate = now.toLocaleDateString('id-ID', options);
+
+        // var noteformat = note.replace(/\s+/g, "%20");
+        // console.log("runningquerry");
+
+
+        console.log("runningquerry2");
+
+        // console.log("totjob: " + totjob);
+        db.query('INSERT INTO outcome (id, pengeluaran, tanggal) VALUES (?, ?, ?)', ["", outcomeformat, nowDate], (error, results) => {
+            if (error) {
+                console.error(error);
+            } else {
+                console.info("Data inserted into recap table");
+            }
+        });
+
+        // console.log("totjob: " + totjob);
+        console.log("runningquerryend");
+
+
+
+
+        return;
+    }
+});
+
+client.on('message_create', message => {
+
+
+    const str = message.body;
+    const arr = str.split(/\r?\n/);
+    // console.log(arr[0]);
     if (arr[0] === '!recap') {
         console.log("runningrecap");
 
